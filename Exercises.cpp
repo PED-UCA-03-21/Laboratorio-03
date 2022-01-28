@@ -15,33 +15,32 @@ class SimpleList {
     Node *_getTail(Node *p) {
       if(!p) return NULL;
 
-      if(p->next) {
-        return _getTail(p->next);
-      } else {
+      if(!p->next) {
         return p;
+      } else {
+        return _getTail(p->next);
       }
     }
 
-    int _find(Node *p, int pos, int value) { 
-      if (!p) return -1;
+    int _find(Node *p, int pos, int value) {
+      if(!p) return -1;
 
-      if(p->value ==  value) {
+      if(p->value == value) {
         return pos;
       } else {
         return _find(p->next, pos + 1, value);
       }
     }
 
-
-  public: 
+  public:
     SimpleList();
-    Node *getTail();
     void insertAtStart(int value);
     void insertAtEnd(int value);
     void remove(int value);
-    bool isEmpty();
     int find(int value);
     string toString();
+    bool isEmpty();
+    Node *getTail();
 };
 
 SimpleList::SimpleList() {
@@ -52,11 +51,21 @@ Node *SimpleList::getTail() {
   return _getTail(head);
 }
 
+bool SimpleList::isEmpty() {
+  /* if(head == NULL) {
+    return true;
+  }else {
+    return false;
+  } */
+
+  return head == NULL;
+}
+
 void SimpleList::insertAtStart(int value) {
   Node *newNode = new Node;
   newNode->value = value;
   newNode->next = NULL;
-  
+
   if(!head) {
     head = newNode;
   } else {
@@ -79,18 +88,37 @@ void SimpleList::insertAtEnd(int value) {
   }
 }
 
-bool SimpleList::isEmpty() {
-  return head == NULL;
+void SimpleList::remove(int value) {
+  Node *n = head;
+
+  if(!head) return;
+
+  if(n->value == value) {
+    head = n->next;
+    delete n;
+    return;
+  }
+
+  while(n->next && n->next->value != value) {
+    n = n->next;
+  }
+
+  //Posibilidades de n: 1. Es el anterior al que busco 2. Es el ultimo elemento
+  if(!n->next) return;
+
+  Node *r = n->next;
+  n->next = r->next;
+  delete r;
 }
 
 string SimpleList::toString() {
   Node *n = head;
-  string result = "Data [";
+  string result = "List [";
 
   if(n) {
-    while (n) {
+    while(n) {
       result = result + " -> " + to_string(n->value);
-      n = n->next;
+      n=n->next;
     }
   }
 
@@ -102,19 +130,8 @@ int SimpleList::find(int value) {
   return _find(head, 0, value);
 }
 
-void SimpleList::remove(int value) {
-  Node *n = head;
 
-  if(!n) return;
 
-  while(n->next && n->next->value !=value) {
-    n = n->next;
-  }
-
-  if (!n->next) return;
-
-  n->next = n->next->next;
-}
 
 class SetList {
   private:
@@ -124,47 +141,20 @@ class SetList {
     SetList();
     void insert(int value);
     string toString();
-
 };
 
 SetList::SetList() {
   head = NULL;
 }
 
-void SetList::insert(int value) {
-  Node *newNode = new Node;
-  newNode->value = value;
-  newNode->next = NULL;
-
-  Node *n = head;
-  
-  if (!n) {
-    head = newNode;
-  } else {
-
-    bool isRepeated = false;
-    while(n->next) {
-      if(n->value == value) {
-        isRepeated = true;
-        break;
-      }
-
-      n = n->next;
-    }
-
-    if(isRepeated) return;
-    n->next = newNode;
-  }
-}
-
 string SetList::toString() {
   Node *n = head;
-  string result = "Data [";
+  string result = "Set [";
 
   if(n) {
-    while (n) {
+    while(n) {
       result = result + " -> " + to_string(n->value);
-      n = n->next;
+      n=n->next;
     }
   }
 
@@ -172,39 +162,107 @@ string SetList::toString() {
   return result;
 }
 
+void SetList::insert(int value) {
+  Node *newNode = new Node;
+  newNode->value = value;
+  newNode->next = NULL;
+
+  if(!head) {
+    head = newNode;
+    return;
+  }
+
+  Node *n = head;
+  bool isRepeated = false;
+
+  while(n->next && !isRepeated) {
+    if(n->value == value) {
+      isRepeated = true;
+    }
+
+    n = n->next;
+  } 
+
+  isRepeated = isRepeated || n->value == value;
+
+  if(!isRepeated) {
+    n->next = newNode;
+  } else {
+    delete newNode;
+  }
+}
+
+
 int main(void) {
+
   SimpleList l1 = SimpleList();
+  SetList set = SetList();
 
-  string isEmptyStr = l1.isEmpty() ? "Esta vacia" : "No esta vacia";
-  cout << "Estado actual de L1: " << isEmptyStr << endl << endl;
+  /* string isEmptyStr = l1.isEmpty() ? "Esta vacia" : "Tiene datos";
+  cout << "Estado de la lista: " << isEmptyStr << endl << endl;
 
-  cout << "Ingresando los valores de la lista (inicio)" << endl;
+  cout << "Pidiendo los valores de la lista (inicio)..." << endl;
 
   int value = 0;
   do {
     cout << "Valor: ";
     cin >> value;
 
-    if (value != 0) {
+    if(value != 0) {
       l1.insertAtStart(value);
     }
-  } while (value != 0);
-  
-  cout << endl << "Ingresando los valores de la lista (final)" << endl;
+  } while(value != 0);
+
+  cout << "Pidiendo los valores de la lista (final)..." << endl;
 
   value = 0;
   do {
     cout << "Valor: ";
     cin >> value;
 
-    if (value != 0) {
+    if(value != 0) {
       l1.insertAtEnd(value);
     }
-  } while (value != 0);
+  } while(value != 0);
 
-  cout << endl << "---- LISTA 1 ----" << endl << "L1: " << l1.toString() << endl;
-  isEmptyStr = l1.isEmpty() ? "Esta vacia" : "No esta vacia";
-  cout << "Estado actual de L1: " << isEmptyStr << endl << endl;
+  cout << "--- LISTA 1 ---" << endl;
+  cout << "L1: " << l1.toString() << endl << endl;
+
+  isEmptyStr = l1.isEmpty() ? "Esta vacia" : "Tiene datos";
+  cout << "Estado de la lista: " << isEmptyStr << endl << endl;
+
+  cout << "Numero a buscar: ";
+  int toFind = 0, posFound;
+  cin >> toFind;
+
+  posFound = l1.find(toFind);
+  if (posFound < 0) {
+    cout << "Numero no encontrado" << endl << endl;
+  } else {
+    cout << "El Numero esta en la posicion: " << posFound << endl << endl;
+  }
+
+  cout << "Numero a eliminar: ";
+  int toRemove = 0;
+  cin >> toRemove;
+
+  l1.remove(toRemove);
+  cout << "L1: " << l1.toString() << endl << endl; */
+
+  cout << "Pidiendo los valores del set..." << endl;
+
+  int value = 0;
+  do {
+    cout << "Valor: ";
+    cin >> value;
+
+    if(value != 0) {
+      set.insert(value);
+    }
+  } while(value != 0);
+
+  cout << "--- SET ---" << endl;
+  cout << "S1: " << set.toString() << endl << endl;
 
   return 0;
 }
